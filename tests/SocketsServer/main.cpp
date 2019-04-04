@@ -5,7 +5,24 @@
 #include <ws2tcpip.h>
 #include"SocketAddress.h"
 #include"TCPSocket.h"
+#include <vector>
 #include "Game.h"
+
+
+void playWithClient(StatusGame partida, TCPSocket tcpSocket) {
+	const char* buffer;
+	while (partida.numberGames < MAX_GAMES) {
+
+		StatusGame partida = StatusGame::deserialize(buffer);
+		Game::CheckWinner(partida);
+		std::string s = StatusGame::serialize(partida);
+		const char* charstring = s.c_str();
+		std::cout << "Devolvemos " << buffer << std::endl;
+		tcpSocket.sendTo(const_cast<char*>(charstring), 1);
+		int receciveValue = tcpSocket.receiveFrom(&buffer, sizeof(buffer));
+	}
+
+}
 
 int main() {
 	std::cout << "Empieza Server" << std::endl;
@@ -27,7 +44,8 @@ int main() {
 
 
 	SocketAddress sa(saServer.sin_addr.S_un.S_addr, saServer.sin_port);
-
+	std::vector<std::thread> threads[MAX_GAMES];
+	int numberThread = 0;
 	TCPSocket tcpSocket = TCPSocket::TCPSocket(listeningSocket);
 	int res = tcpSocket.bindTo(sa);
 	if (res == 0) {
@@ -45,16 +63,17 @@ int main() {
 				if (receciveValue > 0) {
 					//creamos nuevo thread
 					std::cout << "RECIBIMOS " << buffer << std::endl;
-
 					StatusGame partida = StatusGame::deserialize(buffer);
-					if (partida.numberGames = MAX_GAMES) {
-
-					}
-					Game::CheckWinner(partida);
-					std::string s = StatusGame::serialize(partida);
-					const char* charstring = s.c_str();
-					std::cout << "Devolvemos " << buffer << std::endl;
-					tcpSocket.sendTo(const_cast<char*>(charstring), 1);
+					std::thread threadWithPlayer(playWithClient, partida, tcpSocket);
+					threads->push_back(threadWithPlayer);
+					/*Game::CheckWinner(partida);
+					std::string s = StatusGame::serialize(partida);*/
+					//const char* charstring = s.c_str();
+					//std::cout << "Devolvemos " << buffer << std::endl;
+					//tcpSocket.sendTo(const_cast<char*>(charstring), 1);
+				//	if (partida.numberGames = MAX_GAMES) {
+				////Cerramos conexcion
+				//	}
 				}
 
 
@@ -62,6 +81,10 @@ int main() {
 			else {
 				ok != ok;
 			}
+		}
+		for (size_t i = 0; i < threads->size(); i++)
+		{
+			threads->at(i).join();
 
 		}
 	}
