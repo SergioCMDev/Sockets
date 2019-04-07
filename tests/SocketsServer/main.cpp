@@ -1,6 +1,6 @@
 #include <iostream>
 #include <thread>
-
+#include "StateGame.h"
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include"SocketAddress.h"
@@ -8,12 +8,18 @@
 #include <vector>
 #include "Game.h"
 
+int GetRandomInt(int max) {
+	//return (rand() % max + 1); //Desde 1 a Max
+	return (rand() % max); //Desde 0 a Max
+}
 
 void playWithClient(StatusGame partida, TCPSocket tcpSocket) {
 	const char* buffer;
 	while (partida.numberGames < MAX_GAMES) {
 
 		StatusGame partida = StatusGame::deserialize(buffer);
+		int move = GetRandomInt(MAX_GAMES / 2);
+		partida.movePlayer2 = StateGame(move);
 		Game::CheckWinner(partida);
 		std::string s = StatusGame::serialize(partida);
 		const char* charstring = s.c_str();
