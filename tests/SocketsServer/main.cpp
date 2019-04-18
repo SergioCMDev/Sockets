@@ -27,7 +27,6 @@ void playWithClient(StatusGame partida, TCPSocket tcpSocket) {
 		tcpSocket.sendTo(const_cast<char*>(charstring), 1);
 		int receciveValue = tcpSocket.receiveFrom(&buffer, sizeof(buffer));
 	}
-
 }
 
 int main() {
@@ -70,29 +69,19 @@ int main() {
 					//creamos nuevo thread
 					std::cout << "RECIBIMOS " << buffer << std::endl;
 					StatusGame partida = StatusGame::deserialize(buffer);
-					std::thread threadWithPlayer(playWithClient, partida, tcpSocket);
-					threads->push_back(threadWithPlayer);
-					/*Game::CheckWinner(partida);
-					std::string s = StatusGame::serialize(partida);*/
-					//const char* charstring = s.c_str();
-					//std::cout << "Devolvemos " << buffer << std::endl;
-					//tcpSocket.sendTo(const_cast<char*>(charstring), 1);
-				//	if (partida.numberGames = MAX_GAMES) {
-				////Cerramos conexcion
-				//	}
+					//std::thread threadWithPlayer(playWithClient, partida, tcpSocket);
+					threads->push_back(std::thread (playWithClient, partida, tcpSocket));
+					//threads->push_back(threadWithPlayer);
 				}
-
-
 			}
 			else {
 				ok != ok;
 			}
 		}
-		for (size_t i = 0; i < threads->size(); i++)
-		{
-			threads->at(i).join();
-
-		}
+			for (size_t i = 0; i < threads->size(); i++)
+			{
+				threads->at(i).join();
+			}
 	}
 	WSACleanup();
 	shutdown(listeningSocket, SD_SEND);
