@@ -1,0 +1,1 @@
+enum StateGame { rock, scissor, paper, lizard, spock };
